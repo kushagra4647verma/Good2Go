@@ -10,7 +10,7 @@ import reviewsRouter from "./routes/Reviews.routes.js";
 const __dirname = path.resolve();
 dotenv.config();
 const app = express();
-app.use(cors());
+
 app.use(express.json());
 app.use("/api/places", placesRouter);
 app.use("/api/users", usersRouter);
