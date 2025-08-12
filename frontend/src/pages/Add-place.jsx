@@ -66,7 +66,13 @@ export function AddPlace() {
   }
 
   return (
-    <div style={{ fontFamily: "'Poppins', sans-serif", minHeight: "100vh" }}>
+    <div
+      style={{
+        fontFamily: "'Poppins', sans-serif",
+        minHeight: "100vh",
+        backgroundColor: "white",
+      }}
+    >
       <Navbar />
 
       <div
@@ -77,7 +83,9 @@ export function AddPlace() {
           backgroundColor: "#F3F7F0",
         }}
       >
-        <h1 style={{ marginBottom: "1rem", fontSize: "3vh" }}>Add New Place</h1>
+        <h1 style={{ marginBottom: "1rem", fontSize: "3vh", color: "black" }}>
+          Add New Place
+        </h1>
 
         {error && (
           <div style={{ color: "red", marginBottom: "1rem" }}>{error}</div>
@@ -139,6 +147,7 @@ export function AddPlace() {
                 height: "200px",
                 objectFit: "cover",
                 borderRadius: "6px",
+                backgroundColor: "white",
               }}
             />
           )}
@@ -181,4 +190,5 @@ const inputStyle = {
   borderRadius: "6px",
   fontSize: "1rem",
   width: "100%",
+  backgroundColor: "white",
 };

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import API from "../../utils/api";
 import { FaStar } from "react-icons/fa";
 import { Loader } from "./Loader";
+import { Navbar } from "@/components/Navbar";
 
 export function ReviewPage() {
   const { id } = useParams();
@@ -53,7 +54,8 @@ export function ReviewPage() {
   if (!place) return <Loader />;
 
   return (
-    <div style={{ backgroundColor: "#F3F7F0" }}>
+    <div style={{ backgroundColor: "#F3F7F0", color: "black" }}>
+      <Navbar />
       <button
         onClick={() => navigate(-1)}
         style={{

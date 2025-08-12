@@ -370,7 +370,9 @@ function PlaceCard({ place, type, onDelete }) {
         >
           {place.category}
         </span>
-        <div style={{ marginTop: "0.3rem", fontSize: "0.85rem" }}>
+        <div
+          style={{ marginTop: "0.3rem", fontSize: "0.85rem", color: "black" }}
+        >
           ⭐ {place.averageRating?.toFixed(1) || 0}
         </div>
       </div>
@@ -454,7 +456,7 @@ function ReviewCard({ review, onDelete }) {
         >
           <FaMapMarkerAlt /> {place.location}
         </p>
-        <div style={{ margin: "4px 0", fontSize: "0.85rem" }}>
+        <div style={{ margin: "4px 0", fontSize: "0.85rem", color: "black" }}>
           ⭐ {review.rating.toFixed(1)}
         </div>
         <p style={{ margin: "6px 0", fontSize: "0.9rem", color: "#333" }}>

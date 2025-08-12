@@ -39,7 +39,7 @@ function Layout() {
   }, []);
 
   return (
-    <div style={{ backgroundColor: "#ffffff", maxHeight: "100vh" }}>
+    <div style={{ backgroundColor: "#ffffff", minHeight: "100vh" }}>
       <Navbar />
 
       {loading ? (
