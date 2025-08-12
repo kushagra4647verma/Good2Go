@@ -1,0 +1,27 @@
+/* Reset browser default spacing */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Scrollbar width */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Scrollbar track */
+::-webkit-scrollbar-track {
+  background: #1c3144; /* light greenish */
+}
+
+/* Scrollbar thumb */
+::-webkit-scrollbar-thumb {
+  background: #f3f7f0; /* your theme blue */
+  border-radius: 10px;
+}
+
+/* On hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #2f6b9c;
+}

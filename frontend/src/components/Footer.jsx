@@ -1,0 +1,22 @@
+export function Footer() {
+  return (
+    <footer
+      style={{
+        height: "8vh",
+        backgroundColor: "#1C3144",
+        color: "white",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0 2vw",
+        fontSize: "14px",
+        fontWeight: "500",
+        bottom: 0,
+        left: 0,
+        width: "100%",
+      }}
+    >
+      © {new Date().getFullYear()} Good2Go App
+    </footer>
+  );
+}
