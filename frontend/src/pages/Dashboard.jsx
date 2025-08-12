@@ -113,6 +113,7 @@ export function Dashboard() {
                 justifyContent: "center",
                 fontSize: "1.5rem",
                 fontWeight: "bold",
+                color: "black",
               }}
             >
               {user?.username?.[0]?.toUpperCase()}
@@ -195,13 +196,22 @@ export function Dashboard() {
             borderBottom: "2px solid #eee",
           }}
         >
-          <button style={tabBtnStyle} onClick={() => setActiveTab("saved")}>
+          <button
+            style={{ ...tabBtnStyle, color: "black" }}
+            onClick={() => setActiveTab("saved")}
+          >
             Saved Places ({savedPlaces.length})
           </button>
-          <button style={tabBtnStyle} onClick={() => setActiveTab("my")}>
+          <button
+            style={{ ...tabBtnStyle, color: "black" }}
+            onClick={() => setActiveTab("my")}
+          >
             My Places ({myPlaces.length})
           </button>
-          <button style={tabBtnStyle} onClick={() => setActiveTab("reviews")}>
+          <button
+            style={{ ...tabBtnStyle, color: "black" }}
+            onClick={() => setActiveTab("reviews")}
+          >
             My Reviews ({myReviews.length})
           </button>
         </div>
@@ -266,7 +276,7 @@ function StatCard({ icon, color, number, text }) {
       <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem", color }}>
         {icon}
       </div>
-      <h3 style={{ margin: 0 }}>{number}</h3>
+      <h3 style={{ margin: 0, color: "black" }}>{number}</h3>
       <p style={{ margin: 0, color: "#666" }}>{text}</p>
     </div>
   );
@@ -298,7 +308,7 @@ function PlaceCard({ place, type, onDelete }) {
             alignItems: "center",
           }}
         >
-          <h4 style={{ margin: 0 }}>{place.name}</h4>
+          <h4 style={{ margin: 0, color: "black" }}>{place.name}</h4>
           <div
             style={{ cursor: "pointer", padding: "4px" }}
             onClick={() => setShowMenu((prev) => !prev)}
@@ -395,7 +405,7 @@ function ReviewCard({ review, onDelete }) {
             alignItems: "center",
           }}
         >
-          <h4 style={{ margin: 0 }}>{place.name}</h4>
+          <h4 style={{ margin: 0, color: "black" }}>{place.name}</h4>
           <div
             style={{ cursor: "pointer", padding: "4px" }}
             onClick={() => setShowMenu((prev) => !prev)}

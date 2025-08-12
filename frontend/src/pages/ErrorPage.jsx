@@ -20,7 +20,9 @@ export function Errorpage() {
         fontSize: "7vh",
       }}
     >
-      <div>Sorry! The page isn't available right now!</div>
+      <div style={{ color: "black" }}>
+        Sorry! The page isn't available right now!
+      </div>
       <br></br>
       <div>
         <button

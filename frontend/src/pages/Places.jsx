@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import API from "../../utils/api.js";
 import { Navbar } from "@/components/Navbar.jsx";
 import { Footer } from "@/components/Footer.jsx";
-import { Container } from "@chakra-ui/react";
 import { PlaceComponent } from "@/components/PlaceComponent.jsx";
 import { Loader } from "./Loader.jsx";
 
