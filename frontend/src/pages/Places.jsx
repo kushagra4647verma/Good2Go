@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import API from "../../utils/api.js";
 import { Navbar } from "@/components/Navbar.jsx";
 import { Footer } from "@/components/Footer.jsx";
-import { useColorMode, useColorModeValue } from "@/components/ui/color-mode";
 import { Container } from "@chakra-ui/react";
 import { PlaceComponent } from "@/components/PlaceComponent.jsx";
 import { Loader } from "./Loader.jsx";
@@ -16,7 +15,6 @@ export function Places() {
 }
 
 function Layout() {
-  const { colorMode, toggleColorMode } = useColorMode();
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +40,7 @@ function Layout() {
   }, []);
 
   return (
-    <Container bg={useColorModeValue("#ffffff", "#1C3144")} maxH={"100vh"}>
+    <div style={{ backgroundColor: "#ffffff", maxHeight: "100vh" }}>
       <Navbar />
 
       {loading ? (
@@ -78,6 +76,6 @@ function Layout() {
       )}
 
       <Footer />
-    </Container>
+    </div>
   );
 }
