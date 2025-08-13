@@ -21,6 +21,7 @@ export function Dashboard() {
   const [myReviews, setMyReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("saved");
+  const [editingPlace, setEditingPlace] = useState(null);
 
   async function fetchDashboardData() {
     try {
@@ -57,6 +58,20 @@ export function Dashboard() {
       setMyPlaces((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
       console.error("Failed to delete place", err);
+    }
+  }
+
+  async function updatePlace(id, updatedData) {
+    try {
+      const res = await API.put(`/places/${id}`, updatedData, {
+        headers: { token: localStorage.getItem("token") },
+      });
+      setMyPlaces((prev) =>
+        prev.map((p) => (p._id === id ? res.data.data : p))
+      );
+      setEditingPlace(null);
+    } catch (err) {
+      console.error("Failed to update place", err);
     }
   }
 
@@ -238,6 +253,7 @@ export function Dashboard() {
                   place={place}
                   type="my"
                   onDelete={deletePlace}
+                  onEdit={(place) => setEditingPlace(place)}
                 />
               ))}
             </div>
@@ -256,6 +272,14 @@ export function Dashboard() {
           )}
         </div>
       </div>
+
+      {editingPlace && (
+        <EditPlaceModal
+          place={editingPlace}
+          onUpdate={updatePlace}
+          onClose={() => setEditingPlace(null)}
+        />
+      )}
 
       <Footer />
     </div>
@@ -282,7 +306,7 @@ function StatCard({ icon, color, number, text }) {
   );
 }
 
-function PlaceCard({ place, type, onDelete }) {
+function PlaceCard({ place, type, onDelete, onEdit }) {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
@@ -330,6 +354,23 @@ function PlaceCard({ place, type, onDelete }) {
               zIndex: 10,
             }}
           >
+            {type === "my" && (
+              <div
+                style={{
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+                onClick={() => {
+                  setShowMenu(false);
+                  onEdit(place);
+                }}
+              >
+                <FaPen /> Edit Place
+              </div>
+            )}
             <div
               style={{
                 padding: "8px 12px",
@@ -338,7 +379,10 @@ function PlaceCard({ place, type, onDelete }) {
                 alignItems: "center",
                 gap: "6px",
               }}
-              onClick={() => onDelete(place._id)}
+              onClick={() => {
+                setShowMenu(false);
+                onDelete(place._id);
+              }}
             >
               <FaTrash /> {type === "my" ? "Delete Place" : "Remove Bookmark"}
             </div>
@@ -394,8 +438,8 @@ function ReviewCard({ review, onDelete }) {
       }}
     >
       <img
-        src={place.image || "/placeholder.jpg"}
-        alt={place.name}
+        src={place?.image || "/placeholder.jpg"}
+        alt={place?.name || "Deleted Place"}
         style={{ width: "100%", height: "150px", objectFit: "cover" }}
       />
 
@@ -407,7 +451,9 @@ function ReviewCard({ review, onDelete }) {
             alignItems: "center",
           }}
         >
-          <h4 style={{ margin: 0, color: "black" }}>{place.name}</h4>
+          <h4 style={{ margin: 0, color: "black" }}>
+            {place?.name || "Deleted Place"}
+          </h4>
           <div
             style={{ cursor: "pointer", padding: "4px" }}
             onClick={() => setShowMenu((prev) => !prev)}
@@ -437,7 +483,10 @@ function ReviewCard({ review, onDelete }) {
                 alignItems: "center",
                 gap: "6px",
               }}
-              onClick={() => onDelete(review._id)}
+              onClick={() => {
+                setShowMenu(false);
+                onDelete(review._id);
+              }}
             >
               <FaTrash /> Delete Review
             </div>
@@ -454,7 +503,7 @@ function ReviewCard({ review, onDelete }) {
             gap: "5px",
           }}
         >
-          <FaMapMarkerAlt /> {place.location}
+          <FaMapMarkerAlt /> {place?.location || "Unknown Location"}
         </p>
         <div style={{ margin: "4px 0", fontSize: "0.85rem", color: "black" }}>
           ⭐ {review.rating.toFixed(1)}
@@ -466,6 +515,145 @@ function ReviewCard({ review, onDelete }) {
     </div>
   );
 }
+
+function EditPlaceModal({ place, onUpdate, onClose }) {
+  const [formData, setFormData] = useState({
+    name: place.name,
+    category: place.category,
+    location: place.location,
+    description: place.description,
+    image: place.image || "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onUpdate(place._id, formData);
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        background: "rgba(0,0,0,0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 100,
+      }}
+    >
+      <div
+        style={{
+          background: "#fff",
+          padding: "2rem",
+          borderRadius: "12px",
+          width: "400px",
+          maxWidth: "90%",
+        }}
+      >
+        <h3 style={{ margin: "0 0 1rem" }}>Edit Place</h3>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Name"
+            style={inputStyle}
+            required
+          />
+          <input
+            type="text"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            placeholder="Category"
+            style={inputStyle}
+            required
+          />
+          <input
+            type="text"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            placeholder="Location"
+            style={inputStyle}
+            required
+          />
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Description"
+            style={{ ...inputStyle, height: "100px" }}
+            required
+          />
+          <input
+            type="text"
+            name="image"
+            value={formData.image}
+            onChange={handleChange}
+            placeholder="Image URL (optional)"
+            style={inputStyle}
+          />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "1rem",
+              marginTop: "1rem",
+            }}
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                background: "#ccc",
+                color: "#333",
+                padding: "10px 15px",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              style={{
+                background: "#3F88C5",
+                color: "#fff",
+                padding: "10px 15px",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              Update
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const inputStyle = {
+  width: "100%",
+  padding: "10px",
+  marginBottom: "1rem",
+  border: "1px solid #ddd",
+  borderRadius: "6px",
+  fontSize: "1rem",
+};
 
 const gridStyle = {
   display: "grid",

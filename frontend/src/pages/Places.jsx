@@ -41,7 +41,7 @@ function Layout() {
   return (
     <div
       style={{
-        backgroundColor: "#F5FFFA",
+        backgroundColor: "#F3F7F0",
         minHeight: "100vh",
         margin: 0,
         width: "100%",
