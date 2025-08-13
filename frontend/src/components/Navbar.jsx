@@ -16,7 +16,14 @@ export function Navbar() {
         width: "100%",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center" }}>
+      <Link
+        to="/places"
+        style={{
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
         <img
           src="/logo.png"
           alt="Good2Go Logo"
@@ -27,8 +34,10 @@ export function Navbar() {
             marginRight: "1vw",
           }}
         />
-        <h1 style={{ fontSize: "2.4vh", fontWeight: 600 }}>Good2Go</h1>
-      </div>
+        <h1 style={{ fontSize: "2.4vh", fontWeight: 600, margin: 0 }}>
+          Good2Go
+        </h1>
+      </Link>
 
       <div style={{ display: "flex", alignItems: "center", gap: "1.5vw" }}>
         <div style={{ display: "flex", gap: "1vw", alignItems: "center" }}>

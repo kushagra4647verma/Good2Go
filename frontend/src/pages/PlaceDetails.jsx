@@ -37,17 +37,23 @@ export function PlaceDetails() {
   useEffect(() => {
     async function fetchData() {
       try {
+        setLoading(true);
         const token = localStorage.getItem("token");
-        const [placeRes, reviewsRes, savedRes] = await Promise.all([
+        const [placeRes, reviewsRes] = await Promise.all([
           API.get(`/places/${id}`),
           API.get(`/reviews/${id}`),
-          API.get("/users/saved", { headers: { token } }),
         ]);
         setPlace(placeRes.data.data);
         setReviews(reviewsRes.data.data);
 
-        if (savedRes.data.data.some((p) => p._id === id)) {
-          setIsBookmarked(true);
+        // Only fetch saved places if token exists
+        if (token) {
+          const savedRes = await API.get("/users/saved", {
+            headers: { token },
+          });
+          if (savedRes.data.data.some((p) => p._id === id)) {
+            setIsBookmarked(true);
+          }
         }
       } catch (err) {
         console.error("Error fetching place details or reviews:", err);
@@ -59,8 +65,14 @@ export function PlaceDetails() {
   }, [id]);
 
   async function toggleBookmark() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // Redirect to login if not logged in
+      navigate("/login");
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
       if (isBookmarked) {
         await API.delete(`/users/save/${id}`, { headers: { token } });
         setIsBookmarked(false);
@@ -125,11 +137,19 @@ export function PlaceDetails() {
                 right: "15px",
                 cursor: "pointer",
                 fontSize: "1.8rem",
-                color: isBookmarked ? "red" : "white",
+                color: token ? (isBookmarked ? "red" : "white") : "#ccc", // Grayed out if no token
                 textShadow: "0 0 5px rgba(0,0,0,0.5)",
               }}
             >
-              {isBookmarked ? <FaHeart /> : <FaRegHeart />}
+              {token ? (
+                isBookmarked ? (
+                  <FaHeart />
+                ) : (
+                  <FaRegHeart />
+                )
+              ) : (
+                <FaRegHeart />
+              )}
             </div>
           </div>
 
