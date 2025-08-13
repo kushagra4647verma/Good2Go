@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+
 export function PlaceComponent({
   id,
   image = "",
@@ -18,7 +19,7 @@ export function PlaceComponent({
         border: "1px solid #ddd",
         borderRadius: "8px",
         overflow: "hidden",
-        maxWidth: "400px",
+        maxWidth: "350px",
         backgroundColor: "#fff",
       }}
     >
@@ -28,7 +29,7 @@ export function PlaceComponent({
         style={{
           width: "100%",
           height: "200px",
-          objectFit: "contain",
+          objectFit: "cover",
           backgroundColor: "#ffffffff",
         }}
       />
@@ -37,10 +38,10 @@ export function PlaceComponent({
         style={{ backgroundColor: "#F3F7F0", padding: "10px", color: "black" }}
       >
         <h3 style={{ margin: 0, fontWeight: "bold" }}>{title}</h3>
-        <p style={{ margin: 0 }}>{category}</p>
-        <p style={{ margin: 0 }}>{location}</p>
-        <p style={{ margin: 0 }}>{description}</p>
-        <p style={{ margin: 0 }}>
+        <p style={{ margin: "5px 0" }}>{category}</p>
+        <p style={{ margin: "5px 0" }}>{location}</p>
+        <p style={{ margin: "5px 0" }}>{description}</p>
+        <p style={{ margin: "5px 0" }}>
           ⭐ {displayRating} ({reviews} reviews)
         </p>
         <ButtonRow id={id} />
@@ -84,13 +85,14 @@ function HoverButton({ text, bg, color, border, page }) {
     borderRadius: "30px",
     backgroundColor: bg === "#ffffff" && hovered ? "#FFBA08" : bg,
     color: color,
-    padding: "10px 15px",
+    padding: "10px 20px",
     fontWeight: "bold",
     fontSize: "14px",
     border: `2px solid ${border}`,
     transition: "all 0.2s ease-in-out",
     cursor: "pointer",
-    flex: 1,
+    flex: "1",
+    minWidth: "130px",
     textAlign: "center",
   };
 
