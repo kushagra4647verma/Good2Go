@@ -7,6 +7,7 @@ export function Navbar() {
       style={{
         height: "8vh",
         backgroundColor: "#1C3144",
+        marginBottom: "2vh",
         color: "white",
         display: "flex",
         alignItems: "center",

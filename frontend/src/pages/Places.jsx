@@ -61,11 +61,11 @@ function Layout() {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
             gap: "1.5rem",
-            padding: "0", // No padding to match edge-to-edge
-            margin: "0 auto", // Centers the grid
-            maxWidth: "1200px", // Constrains width on large screens
-            width: "100%", // Ensures full available width
-            minHeight: "calc(100vh - 16vh)", // Adjusts for Navbar (8vh) and Footer (8vh)
+            padding: "0",
+            margin: "0 auto",
+            maxWidth: "1200px",
+            width: "100%",
+            minHeight: "calc(100vh - 16vh)",
           }}
         >
           {places.map((place) => (

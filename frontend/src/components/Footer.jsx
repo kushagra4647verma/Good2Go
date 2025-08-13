@@ -4,6 +4,7 @@ export function Footer() {
       style={{
         height: "8vh",
         backgroundColor: "#1C3144",
+        marginTop: "2vh",
         color: "white",
         display: "flex",
         alignItems: "center",
