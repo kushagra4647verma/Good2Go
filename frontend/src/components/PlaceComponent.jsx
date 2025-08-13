@@ -21,6 +21,7 @@ export function PlaceComponent({
         overflow: "hidden",
         maxWidth: "350px",
         backgroundColor: "#fff",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
       }}
     >
       <img
@@ -35,7 +36,7 @@ export function PlaceComponent({
       />
 
       <div
-        style={{ backgroundColor: "#FFFFFF", padding: "10px", color: "black" }} // Changed to white
+        style={{ backgroundColor: "#F3F7F0", padding: "10px", color: "black" }}
       >
         <h3 style={{ margin: "5px 0", fontWeight: "bold" }}>{title}</h3>
         <p style={{ margin: "5px 0" }}>{category}</p>

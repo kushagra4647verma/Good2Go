@@ -41,7 +41,8 @@ function Layout() {
   return (
     <div
       style={{
-        backgroundColor: "#F3F7F0",
+        background:
+          "linear-gradient(180deg, #FFFAF0 0%, #F3F7F0 40%, #E3F2FD 100%)",
         minHeight: "100vh",
         margin: 0,
         width: "100%",
