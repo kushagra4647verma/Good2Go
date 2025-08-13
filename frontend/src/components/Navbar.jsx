@@ -34,7 +34,14 @@ export function Navbar() {
             marginRight: "1vw",
           }}
         />
-        <h1 style={{ fontSize: "2.4vh", fontWeight: 600, margin: 0 }}>
+        <h1
+          style={{
+            fontSize: "2.5vh",
+            fontWeight: 600,
+            margin: 0,
+            color: "white",
+          }}
+        >
           Good2Go
         </h1>
       </Link>
