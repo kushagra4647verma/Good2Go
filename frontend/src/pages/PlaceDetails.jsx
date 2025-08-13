@@ -46,7 +46,6 @@ export function PlaceDetails() {
         setPlace(placeRes.data.data);
         setReviews(reviewsRes.data.data);
 
-        // Only fetch saved places if token exists
         if (token) {
           const savedRes = await API.get("/users/saved", {
             headers: { token },
@@ -67,7 +66,6 @@ export function PlaceDetails() {
   async function toggleBookmark() {
     const token = localStorage.getItem("token");
     if (!token) {
-      // Redirect to login if not logged in
       navigate("/login");
       return;
     }
@@ -137,7 +135,7 @@ export function PlaceDetails() {
                 right: "15px",
                 cursor: "pointer",
                 fontSize: "1.8rem",
-                color: token ? (isBookmarked ? "red" : "white") : "#ccc", // Grayed out if no token
+                color: { token } ? (isBookmarked ? "red" : "white") : "#ccc",
                 textShadow: "0 0 5px rgba(0,0,0,0.5)",
               }}
             >
