@@ -43,11 +43,11 @@ function Layout() {
       style={{
         backgroundColor: "#F5FFFA",
         minHeight: "100vh",
-        padding: "20px",
+        margin: 0,
+        width: "100%",
+        overflowX: "hidden",
       }}
     >
-      {" "}
-      {/* Changed to mint cream */}
       <Navbar />
       {loading ? (
         <Loader />
@@ -61,7 +61,11 @@ function Layout() {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
             gap: "1.5rem",
-            padding: "1.5rem",
+            padding: "0", // No padding to match edge-to-edge
+            margin: "0 auto", // Centers the grid
+            maxWidth: "1200px", // Constrains width on large screens
+            width: "100%", // Ensures full available width
+            minHeight: "calc(100vh - 16vh)", // Adjusts for Navbar (8vh) and Footer (8vh)
           }}
         >
           {places.map((place) => (

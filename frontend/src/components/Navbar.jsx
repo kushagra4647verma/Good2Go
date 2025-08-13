@@ -10,8 +10,9 @@ export function Navbar() {
         color: "white",
         display: "flex",
         alignItems: "center",
-        padding: "0 2vw",
+        padding: "0",
         justifyContent: "space-between",
+        width: "100%",
       }}
     >
       <div style={{ display: "flex", alignItems: "center" }}>

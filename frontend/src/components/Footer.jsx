@@ -8,7 +8,7 @@ export function Footer() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "0 2vw",
+        padding: "0",
         fontSize: "14px",
         fontWeight: "500",
         bottom: 0,
