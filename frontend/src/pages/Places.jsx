@@ -39,9 +39,16 @@ function Layout() {
   }, []);
 
   return (
-    <div style={{ backgroundColor: "#ffffff", minHeight: "100vh" }}>
+    <div
+      style={{
+        backgroundColor: "#F5FFFA",
+        minHeight: "100vh",
+        padding: "20px",
+      }}
+    >
+      {" "}
+      {/* Changed to mint cream */}
       <Navbar />
-
       {loading ? (
         <Loader />
       ) : places.length === 0 ? (
@@ -73,7 +80,6 @@ function Layout() {
           ))}
         </div>
       )}
-
       <Footer />
     </div>
   );

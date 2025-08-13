@@ -4,6 +4,7 @@ import API from "../../utils/api";
 import { FaStar } from "react-icons/fa";
 import { Loader } from "./Loader";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 
 export function ReviewPage() {
   const { id } = useParams();
@@ -241,6 +242,7 @@ export function ReviewPage() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

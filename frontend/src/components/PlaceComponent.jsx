@@ -35,9 +35,9 @@ export function PlaceComponent({
       />
 
       <div
-        style={{ backgroundColor: "#F3F7F0", padding: "10px", color: "black" }}
+        style={{ backgroundColor: "#FFFFFF", padding: "10px", color: "black" }} // Changed to white
       >
-        <h3 style={{ margin: 0, fontWeight: "bold" }}>{title}</h3>
+        <h3 style={{ margin: "5px 0", fontWeight: "bold" }}>{title}</h3>
         <p style={{ margin: "5px 0" }}>{category}</p>
         <p style={{ margin: "5px 0" }}>{location}</p>
         <p style={{ margin: "5px 0" }}>{description}</p>
