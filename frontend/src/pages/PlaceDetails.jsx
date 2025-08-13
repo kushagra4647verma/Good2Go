@@ -86,6 +86,10 @@ export function PlaceDetails() {
   if (loading) return <Loader />;
   if (!place) return <Errorpage />;
 
+  // Determine bookmark color based on token and isBookmarked
+  const token = localStorage.getItem("token"); // Define token here for use in JSX
+  const bookmarkColor = token ? (isBookmarked ? "red" : "white") : "#ccc"; // Grayed out if no token
+
   return (
     <>
       <Navbar />
@@ -135,7 +139,7 @@ export function PlaceDetails() {
                 right: "15px",
                 cursor: "pointer",
                 fontSize: "1.8rem",
-                color: { token } ? (isBookmarked ? "red" : "white") : "#ccc",
+                color: bookmarkColor,
                 textShadow: "0 0 5px rgba(0,0,0,0.5)",
               }}
             >
