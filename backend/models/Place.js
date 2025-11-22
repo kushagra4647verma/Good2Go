@@ -10,6 +10,22 @@ const placeSchema = new mongoose.Schema(
     },
     location: { type: String, required: true },
     image: { type: String },
+
+    // New fields for tags and coordinates
+    tags: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
+    coordinates: {
+      lat: { type: Number },
+      lng: { type: Number },
+    },
+
+    googleMapsUrl: { type: String },
+
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -20,6 +36,15 @@ const placeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Index for search functionality
+placeSchema.index({
+  name: "text",
+  location: "text",
+  description: "text",
+  tags: "text",
+});
+
 const Place = mongoose.model("Place", placeSchema);
 
 export default Place;

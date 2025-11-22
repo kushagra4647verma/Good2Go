@@ -2,6 +2,25 @@ import { useState } from "react";
 import API from "../../utils/api";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { FaMapMarkerAlt, FaTimes } from "react-icons/fa";
+
+const AVAILABLE_TAGS = [
+  "Café",
+  "Historical Spot",
+  "Adventure",
+  "Nightlife",
+  "Hidden Gem",
+  "Food",
+  "Nature",
+  "Restaurant",
+  "Park",
+  "Museum",
+  "Beach",
+  "Shopping",
+  "Art",
+  "Music",
+  "Sports",
+];
 
 export function AddPlace() {
   const [formData, setFormData] = useState({
@@ -10,13 +29,56 @@ export function AddPlace() {
     category: "",
     image: "",
     description: "",
+    tags: [],
+    coordinates: null, // { lat, lng }
+    googleMapsUrl: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  }
+
+  function handleTagToggle(tag) {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.includes(tag)
+        ? prev.tags.filter((t) => t !== tag)
+        : [...prev.tags, tag],
+    }));
+  }
+
+  function extractCoordinatesFromUrl(url) {
+    // Extract coordinates from Google Maps URLs
+    // Format: https://www.google.com/maps?q=lat,lng or /@lat,lng
+    try {
+      const qMatch = url.match(/q=([-\d.]+),([-\d.]+)/);
+      const atMatch = url.match(/@([-\d.]+),([-\d.]+)/);
+
+      if (qMatch) {
+        return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+      }
+      if (atMatch) {
+        return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+      }
+      return null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function handleMapsUrlChange(e) {
+    const url = e.target.value;
+    setFormData((prev) => ({ ...prev, googleMapsUrl: url }));
+
+    const coords = extractCoordinatesFromUrl(url);
+    if (coords) {
+      setFormData((prev) => ({ ...prev, coordinates: coords }));
+      setError("");
+    }
   }
 
   async function handleImageUpload(e) {
@@ -46,6 +108,12 @@ export function AddPlace() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
+    if (formData.tags.length === 0) {
+      setError("Please select at least one tag");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -88,7 +156,17 @@ export function AddPlace() {
         </h1>
 
         {error && (
-          <div style={{ color: "red", marginBottom: "1rem" }}>{error}</div>
+          <div
+            style={{
+              color: "red",
+              marginBottom: "1rem",
+              padding: "10px",
+              background: "#ffe6e6",
+              borderRadius: "6px",
+            }}
+          >
+            {error}
+          </div>
         )}
 
         <form
@@ -112,25 +190,115 @@ export function AddPlace() {
             required
             style={inputStyle}
           />
+
           <input
             type="text"
             name="location"
-            placeholder="Location"
+            placeholder="Location (e.g., Downtown, City Name)"
             value={formData.location}
             onChange={handleChange}
             required
             style={inputStyle}
           />
+
           <input
             type="text"
             name="category"
-            placeholder="Category (e.g. Cafe, Park)"
+            placeholder="Category (e.g. Cafe, Park, Restaurant)"
             value={formData.category}
             onChange={handleChange}
             required
             style={inputStyle}
           />
 
+          {/* Google Maps Location (Optional) */}
+          <div style={{ marginTop: "1rem" }}>
+            <label
+              style={{
+                fontWeight: "bold",
+                marginBottom: "0.5rem",
+                display: "block",
+              }}
+            >
+              <FaMapMarkerAlt style={{ marginRight: "5px" }} />
+              Google Maps Location (Optional)
+            </label>
+            <input
+              type="text"
+              placeholder="Paste Google Maps URL here"
+              value={formData.googleMapsUrl}
+              onChange={handleMapsUrlChange}
+              style={inputStyle}
+            />
+            {formData.coordinates && (
+              <p
+                style={{
+                  fontSize: "0.85rem",
+                  color: "green",
+                  marginTop: "5px",
+                }}
+              >
+                ✓ Location detected: {formData.coordinates.lat.toFixed(4)},{" "}
+                {formData.coordinates.lng.toFixed(4)}
+              </p>
+            )}
+            <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "5px" }}>
+              To add location: Open Google Maps → Right-click on location → Copy
+              link
+            </p>
+          </div>
+
+          {/* Tags Selection */}
+          <div style={{ marginTop: "1rem" }}>
+            <label
+              style={{
+                fontWeight: "bold",
+                marginBottom: "0.5rem",
+                display: "block",
+              }}
+            >
+              Tags (Select at least one) *
+            </label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {AVAILABLE_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => handleTagToggle(tag)}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    borderRadius: "20px",
+                    border: formData.tags.includes(tag)
+                      ? "2px solid #D00000"
+                      : "1px solid #ccc",
+                    background: formData.tags.includes(tag)
+                      ? "#D00000"
+                      : "#fff",
+                    color: formData.tags.includes(tag) ? "#fff" : "#333",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    fontWeight: formData.tags.includes(tag) ? "bold" : "normal",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+            {formData.tags.length > 0 && (
+              <p
+                style={{
+                  fontSize: "0.85rem",
+                  color: "green",
+                  marginTop: "10px",
+                }}
+              >
+                Selected: {formData.tags.join(", ")}
+              </p>
+            )}
+          </div>
+
+          {/* Image Upload */}
           <input
             type="file"
             accept="image/*"
@@ -165,13 +333,13 @@ export function AddPlace() {
             type="submit"
             disabled={loading || uploading}
             style={{
-              background: "#D00000",
+              background: loading || uploading ? "#ccc" : "#D00000",
               color: "#fff",
               padding: "0.8rem",
               border: "none",
               borderRadius: "6px",
               fontWeight: "bold",
-              cursor: "pointer",
+              cursor: loading || uploading ? "not-allowed" : "pointer",
             }}
           >
             {loading ? "Adding..." : "Add Place"}
