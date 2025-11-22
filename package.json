@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
+  "license": "ISC",
   "scripts": {
     "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+    "backend": "nodemon backend/server.js",
+    "frontend": "npm --prefix frontend run dev",
+    "build": "npm install --prefix frontend && npm run build --prefix frontend",
     "start": "NODE_ENV=production node backend/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "concurrently": "^9.2.1",
@@ -24,7 +24,6 @@
     "nodemailer": "^7.0.10"
   },
   "devDependencies": {
-    "nodeman": "^1.1.2",
     "nodemon": "^3.1.10"
   }
 }
