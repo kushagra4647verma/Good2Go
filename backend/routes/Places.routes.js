@@ -4,35 +4,63 @@ import Place from "../models/Place.js";
 import mongoose from "mongoose";
 const router = express.Router();
 router.post("/", auth, async (req, res) => {
-  const { name, description, category, location, image } = req.body;
+  const {
+    name,
+    description,
+    category,
+    location,
+    image,
+    tags,
+    coordinates,
+    googleMapsUrl,
+  } = req.body;
+
+  // Required validations
   if (!name || !description || !category || !location) {
     return res.status(400).json({
       success: false,
-      message: "Please provide all values!",
+      message: "Please provide all required values!",
     });
   }
+
   try {
+    // Check for existing place
     const existingPlace = await Place.findOne({ name, location });
     if (existingPlace) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Place already exists!" });
+      return res.status(400).json({
+        success: false,
+        message: "Place already exists!",
+      });
     }
+
+    // Create new place with all schema fields
     const newPlace = new Place({
       name,
       description,
       category,
       location,
       image,
+      tags: tags || [],
+      coordinates: coordinates || null,
+      googleMapsUrl: googleMapsUrl || "",
       addedBy: req.user.id,
       reviews: [],
       averageRating: 0,
     });
+
     await newPlace.save();
-    res.status(201).json({ success: true, data: newPlace });
+
+    res.status(201).json({
+      success: true,
+      message: "Place added successfully!",
+      data: newPlace,
+    });
   } catch (error) {
-    console.error("Error in Adding Place:", error.message);
-    res.status(500).json({ success: false, message: "Server Error" });
+    console.error("Error in Adding Place:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
   }
 });
 

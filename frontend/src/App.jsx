@@ -98,7 +98,7 @@ function Landing() {
     </div>
   );
 }
-
+console.log("Google Client ID:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
 function ButtonRow() {
   const rowStyle = {
     display: "flex",

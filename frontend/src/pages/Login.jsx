@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import API from "../../utils/api.js";
 import { FaEnvelope, FaLock, FaUser, FaKey } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -17,52 +17,38 @@ export function Login() {
     width: "100vw",
   };
 
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
   return (
-    <>
-      <div style={baseStyle}>
-        <div
-          style={{
-            height: "100%",
-            width: "50%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#F3F7F0",
-          }}
-        >
-          {incard === "signup" ? (
-            <SignUpCard changestate={() => setIncard("signin")} />
-          ) : (
-            <SignInCard changestate={() => setIncard("signup")} />
-          )}
-        </div>
-
-        <div
-          style={{
-            height: "100%",
-            width: "50%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#ffffff",
-          }}
-        >
-          <About />
-        </div>
+    <div style={baseStyle}>
+      <div
+        style={{
+          height: "100%",
+          width: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#F3F7F0",
+        }}
+      >
+        {incard === "signup" ? (
+          <SignUpCard changestate={() => setIncard("signin")} />
+        ) : (
+          <SignInCard changestate={() => setIncard("signup")} />
+        )}
       </div>
-    </>
+
+      <div
+        style={{
+          height: "100%",
+          width: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        <About />
+      </div>
+    </div>
   );
 }
 
@@ -125,45 +111,246 @@ function About() {
   );
 }
 
-// Google Sign In Button Component
+// Fixed Google Sign In Button Component
 function GoogleSignInButton() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleCredentialResponse = useCallback(
+    async (response) => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const res = await API.post("/users/google-auth", {
+          credential: response.credential,
+        });
+
+        if (res.data.success) {
+          localStorage.setItem("token", res.data.token);
+          navigate("/places");
+        }
+      } catch (err) {
+        console.error("Google sign in error:", err);
+        setError(err.response?.data?.message || "Google sign in failed");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate]
+  );
 
   useEffect(() => {
-    // Initialize Google Sign In
-    if (window.google) {
-      window.google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse,
-      });
-    }
-  }, []);
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-  const handleCredentialResponse = async (response) => {
+    if (!clientId) {
+      setError("Google Client ID not configured");
+      return;
+    }
+
+    // Load Google script
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+
+    script.onload = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleCredentialResponse,
+          // Use popup mode instead of FedCM to avoid the error
+          ux_mode: "popup",
+          // Disable FedCM which causes issues in some browsers
+          use_fedcm_for_prompt: false,
+        });
+
+        // Render the Google button
+        const buttonContainer = document.getElementById("google-signin-button");
+        if (buttonContainer) {
+          window.google.accounts.id.renderButton(buttonContainer, {
+            type: "standard",
+            theme: "outline",
+            size: "large",
+            width: "100%",
+            text: "continue_with",
+            shape: "rectangular",
+            logo_alignment: "left",
+          });
+        }
+      }
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup
+      const existingScript = document.querySelector(
+        'script[src="https://accounts.google.com/gsi/client"]'
+      );
+      if (existingScript) {
+        document.body.removeChild(existingScript);
+      }
+    };
+  }, [handleCredentialResponse]);
+
+  if (error) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          padding: "12px",
+          borderRadius: "10px",
+          backgroundColor: "#fee",
+          color: "#c00",
+          fontSize: "0.9rem",
+          textAlign: "center",
+        }}
+      >
+        {error}
+        <button
+          onClick={() => setError("")}
+          style={{
+            marginLeft: "10px",
+            background: "none",
+            border: "none",
+            color: "#c00",
+            cursor: "pointer",
+            textDecoration: "underline",
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ width: "100%", position: "relative" }}>
+      {/* Google's rendered button */}
+      <div
+        id="google-signin-button"
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      />
+
+      {/* Fallback custom button if Google button doesn't render */}
+      {loading && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(255,255,255,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "10px",
+          }}
+        >
+          Signing in...
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Alternative: Manual Google Button (if the above doesn't work)
+function GoogleSignInButtonManual() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleGoogleSignIn = async () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+    if (!clientId) {
+      setError("Google Client ID not configured");
+      return;
+    }
+
     try {
       setLoading(true);
-      const res = await API.post("/users/google-auth", {
-        credential: response.credential,
-      });
+      setError("");
 
-      if (res.data.success) {
-        localStorage.setItem("token", res.data.token);
-        navigate("/places");
-      }
+      // Open Google OAuth in a popup
+      const width = 500;
+      const height = 600;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
+      const scope = "email profile";
+
+      const authUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=token` +
+        `&scope=${encodeURIComponent(scope)}` +
+        `&prompt=select_account`;
+
+      const popup = window.open(
+        authUrl,
+        "Google Sign In",
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+
+      // Listen for message from popup
+      const handleMessage = async (event) => {
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data.type === "GOOGLE_AUTH_SUCCESS") {
+          window.removeEventListener("message", handleMessage);
+          popup?.close();
+
+          try {
+            const res = await API.post("/users/google-auth", {
+              credential: event.data.credential,
+            });
+
+            if (res.data.success) {
+              localStorage.setItem("token", res.data.token);
+              navigate("/places");
+            }
+          } catch (err) {
+            setError(err.response?.data?.message || "Google sign in failed");
+          }
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
     } catch (err) {
       console.error("Google sign in error:", err);
-      alert(err.response?.data?.message || "Google sign in failed");
+      setError("Failed to open Google Sign-In");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignIn = () => {
-    if (window.google) {
-      window.google.accounts.id.prompt();
-    }
-  };
+  if (error) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          padding: "12px",
+          borderRadius: "10px",
+          backgroundColor: "#fee",
+          color: "#c00",
+          fontSize: "0.9rem",
+          textAlign: "center",
+        }}
+      >
+        {error}
+      </div>
+    );
+  }
 
   return (
     <button
@@ -175,7 +362,7 @@ function GoogleSignInButton() {
         borderRadius: "10px",
         border: "1px solid #ddd",
         backgroundColor: "#fff",
-        cursor: "pointer",
+        cursor: loading ? "not-allowed" : "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -185,8 +372,6 @@ function GoogleSignInButton() {
         transition: "all 0.2s",
         opacity: loading ? 0.7 : 1,
       }}
-      onMouseEnter={(e) => (e.target.style.backgroundColor = "#f8f9fa")}
-      onMouseLeave={(e) => (e.target.style.backgroundColor = "#fff")}
     >
       <FcGoogle size={24} />
       {loading ? "Signing in..." : "Continue with Google"}
@@ -196,7 +381,6 @@ function GoogleSignInButton() {
 
 function SignInCard({ changestate }) {
   const navigate = useNavigate();
-
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -204,20 +388,18 @@ function SignInCard({ changestate }) {
 
   async function handleSignin() {
     setError("");
-
     if (!username || !password) {
       return setError("Please fill in both fields");
     }
 
     try {
       setLoading(true);
-      const res = await API.post("/users/login", {
-        username,
-        password,
-      });
+      const res = await API.post("/users/login", { username, password });
 
-      localStorage.setItem("token", res.data.token);
-      navigate("/places");
+      if (res.data.success) {
+        localStorage.setItem("token", res.data.token);
+        navigate("/places");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Invalid credentials");
     } finally {
@@ -343,6 +525,7 @@ function SignInCard({ changestate }) {
           placeholder="Enter your password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && handleSignin()}
           style={{
             marginTop: "0.5vh",
             width: "100%",
@@ -382,7 +565,6 @@ function SignInCard({ changestate }) {
 
 function SignUpCard({ changestate }) {
   const navigate = useNavigate();
-
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -395,7 +577,6 @@ function SignUpCard({ changestate }) {
 
   async function handleRequestOTP() {
     setError("");
-
     if (!name || !email || !password || !confirmPassword) {
       return setError("Please fill in all fields");
     }
@@ -409,7 +590,6 @@ function SignUpCard({ changestate }) {
     try {
       setLoading(true);
       await API.post("/users/request-otp", { email });
-
       setStep(2);
       setResendTimer(60);
 
@@ -431,14 +611,12 @@ function SignUpCard({ changestate }) {
 
   async function handleVerifyOTP() {
     setError("");
-
     if (!otp || otp.length !== 6) {
       return setError("Please enter the 6-digit OTP");
     }
 
     try {
       setLoading(true);
-
       const signupRes = await API.post("/users/signup", {
         username: name,
         email,
@@ -558,149 +736,38 @@ function SignUpCard({ changestate }) {
             </p>
           )}
 
-          <div style={{ width: "100%", marginBottom: "2vh" }}>
-            <label
-              style={{ fontWeight: "600", fontSize: "2vh", color: "#1C3144" }}
-            >
-              Full Name
-            </label>
-            <div style={{ position: "relative" }}>
-              <FaUser
-                style={{
-                  position: "absolute",
-                  left: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "#666",
-                }}
-              />
-              <input
-                type="text"
-                placeholder="Enter your full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={{
-                  marginTop: "0.5vh",
-                  width: "100%",
-                  padding: "1.5vh 1vw 1.5vh 2.5vw",
-                  borderRadius: "10px",
-                  border: "1px solid #ccc",
-                  fontSize: "2vh",
-                  backgroundColor: "#FFFFFF",
-                  color: "#1C3144",
-                  outlineColor: "#3F88C5",
-                }}
-              />
-            </div>
-          </div>
-
-          <div style={{ width: "100%", marginBottom: "2vh" }}>
-            <label
-              style={{ fontWeight: "600", fontSize: "2vh", color: "#1C3144" }}
-            >
-              Email address
-            </label>
-            <div style={{ position: "relative" }}>
-              <FaEnvelope
-                style={{
-                  position: "absolute",
-                  left: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "#666",
-                }}
-              />
-              <input
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  marginTop: "0.5vh",
-                  width: "100%",
-                  padding: "1.5vh 1vw 1.5vh 2.5vw",
-                  borderRadius: "10px",
-                  border: "1px solid #ccc",
-                  fontSize: "2vh",
-                  backgroundColor: "#FFFFFF",
-                  color: "#1C3144",
-                  outlineColor: "#3F88C5",
-                }}
-              />
-            </div>
-          </div>
-
-          <div style={{ width: "100%", marginBottom: "2vh" }}>
-            <label
-              style={{ fontWeight: "600", fontSize: "2vh", color: "#1C3144" }}
-            >
-              Password
-            </label>
-            <div style={{ position: "relative" }}>
-              <FaLock
-                style={{
-                  position: "absolute",
-                  left: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "#666",
-                }}
-              />
-              <input
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  marginTop: "0.5vh",
-                  width: "100%",
-                  padding: "1.5vh 1vw 1.5vh 2.5vw",
-                  borderRadius: "10px",
-                  border: "1px solid #ccc",
-                  fontSize: "2vh",
-                  backgroundColor: "#FFFFFF",
-                  color: "#1C3144",
-                  outlineColor: "#3F88C5",
-                }}
-              />
-            </div>
-          </div>
-
-          <div style={{ width: "100%", marginBottom: "4vh" }}>
-            <label
-              style={{ fontWeight: "600", fontSize: "2vh", color: "#1C3144" }}
-            >
-              Confirm Password
-            </label>
-            <div style={{ position: "relative" }}>
-              <FaLock
-                style={{
-                  position: "absolute",
-                  left: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "#666",
-                }}
-              />
-              <input
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                style={{
-                  marginTop: "0.5vh",
-                  width: "100%",
-                  padding: "1.5vh 1vw 1.5vh 2.5vw",
-                  borderRadius: "10px",
-                  border: "1px solid #ccc",
-                  fontSize: "2vh",
-                  backgroundColor: "#FFFFFF",
-                  color: "#1C3144",
-                  outlineColor: "#3F88C5",
-                }}
-              />
-            </div>
-          </div>
+          <InputWithIcon
+            icon={<FaUser />}
+            label="Full Name"
+            placeholder="Enter your full name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <InputWithIcon
+            icon={<FaEnvelope />}
+            label="Email address"
+            placeholder="your.email@example.com"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <InputWithIcon
+            icon={<FaLock />}
+            label="Password"
+            placeholder="At least 6 characters"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <InputWithIcon
+            icon={<FaLock />}
+            label="Confirm Password"
+            placeholder="Confirm your password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            last
+          />
 
           <button
             onClick={handleRequestOTP}
@@ -715,7 +782,6 @@ function SignUpCard({ changestate }) {
               fontSize: "2.2vh",
               width: "100%",
               cursor: "pointer",
-              transition: "all 0.2s ease-in-out",
               opacity: loading ? 0.7 : 1,
             }}
           >
@@ -827,7 +893,6 @@ function SignUpCard({ changestate }) {
               fontSize: "2.2vh",
               width: "100%",
               cursor: otp.length === 6 ? "pointer" : "not-allowed",
-              transition: "all 0.2s ease-in-out",
               opacity: loading ? 0.7 : 1,
               marginBottom: "1vh",
             }}
@@ -849,6 +914,54 @@ function SignUpCard({ changestate }) {
           </button>
         </>
       )}
+    </div>
+  );
+}
+
+function InputWithIcon({
+  icon,
+  label,
+  placeholder,
+  type = "text",
+  value,
+  onChange,
+  last = false,
+}) {
+  return (
+    <div style={{ width: "100%", marginBottom: last ? "4vh" : "2vh" }}>
+      <label style={{ fontWeight: "600", fontSize: "2vh", color: "#1C3144" }}>
+        {label}
+      </label>
+      <div style={{ position: "relative" }}>
+        <span
+          style={{
+            position: "absolute",
+            left: "12px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: "#666",
+          }}
+        >
+          {icon}
+        </span>
+        <input
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          style={{
+            marginTop: "0.5vh",
+            width: "100%",
+            padding: "1.5vh 1vw 1.5vh 2.5vw",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+            fontSize: "2vh",
+            backgroundColor: "#FFFFFF",
+            color: "#1C3144",
+            outlineColor: "#3F88C5",
+          }}
+        />
+      </div>
     </div>
   );
 }

@@ -187,6 +187,78 @@ export function PlaceDetails() {
             <p style={{ margin: "15px 0", color: "#555" }}>
               {place.description}
             </p>
+            {/* Category */}
+            <p style={{ margin: "10px 0", color: "#444", fontWeight: "bold" }}>
+              Category:{" "}
+              <span style={{ fontWeight: "normal" }}>{place.category}</span>
+            </p>
+
+            {/* Tags */}
+            {place.tags?.length > 0 && (
+              <div style={{ margin: "10px 0" }}>
+                <p
+                  style={{
+                    margin: "0 0 5px",
+                    color: "#444",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Tags:
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {place.tags.map((tag, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        background: "#E7F0DC",
+                        padding: "5px 10px",
+                        borderRadius: "12px",
+                        fontSize: "13px",
+                        color: "#1C3144",
+                      }}
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Coordinates */}
+            {place.coordinates?.lat && place.coordinates?.lng && (
+              <p style={{ margin: "10px 0", color: "#444" }}>
+                <strong>Coordinates:</strong> {place.coordinates.lat},{" "}
+                {place.coordinates.lng}
+              </p>
+            )}
+
+            {/* Google Maps */}
+            {place.googleMapsUrl && (
+              <a
+                href={place.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-block",
+                  background: "#3F88C5",
+                  color: "#fff",
+                  padding: "10px 15px",
+                  borderRadius: "8px",
+                  textDecoration: "none",
+                  fontWeight: "bold",
+                  marginTop: "10px",
+                }}
+              >
+                Open in Google Maps
+              </a>
+            )}
+
+            {/* Added By */}
+            {place.addedBy && (
+              <p style={{ marginTop: "10px", color: "#555", fontSize: "14px" }}>
+                <strong>Added By:</strong> {place.addedBy.username || "User"}
+              </p>
+            )}
 
             <div style={{ marginTop: "30px" }}>
               <div
