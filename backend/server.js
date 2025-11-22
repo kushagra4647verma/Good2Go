@@ -22,7 +22,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? process.env.FRONTEND_URL || "https://your-frontend-domain.com"
+        ? process.env.FRONTEND_URL || "https://good2go.onrender.com"
         : "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
