@@ -48,12 +48,12 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// if (process.env.NODE_ENV === "production") {
-//   app.use(express.static(path.join(__dirname, "/frontend/dist")));
-//   app.get(/.*/, (req, res) => {
-//     res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
-//   });
-// }
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "/frontend/dist")));
+  app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
+  });
+}
 
 const PORT = process.env.PORT || 5001;
 
