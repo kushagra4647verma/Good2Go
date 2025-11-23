@@ -29,7 +29,6 @@ app.use(
   })
 );
 
-// Debug middleware to log requests
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
@@ -39,7 +38,6 @@ app.use("/api/places", placesRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/reviews", reviewsRouter);
 
-// Health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",

@@ -111,7 +111,6 @@ function About() {
   );
 }
 
-// Fixed Google Sign In Button Component
 function GoogleSignInButton() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -261,7 +260,6 @@ function GoogleSignInButton() {
   );
 }
 
-// Alternative: Manual Google Button (if the above doesn't work)
 function GoogleSignInButtonManual() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);

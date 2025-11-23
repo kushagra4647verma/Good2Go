@@ -1,17 +1,33 @@
 // backend/utils/emailService.js
+// Using Brevo (formerly Sendinblue) - Works on Render!
+// Free: 300 emails/day
+
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
 
-// Configure email transporter (using Gmail as example)
-// You'll need to set up these environment variables:
-// EMAIL_USER=your-email@gmail.com
-// EMAIL_PASS=your-app-specific-password
-
+// Brevo SMTP configuration
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.BREVO_EMAIL, // Your Brevo login email
+    pass: process.env.BREVO_SMTP_KEY, // Your Brevo SMTP key (NOT API key)
   },
+  // Important: Increase timeout for cloud deployments
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
+});
+
+// Verify connection on startup
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("SMTP connection error:", error);
+  } else {
+    console.log("SMTP server is ready to send emails");
+  }
 });
 
 // Generate 6-digit OTP
@@ -19,123 +35,60 @@ export function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Send OTP email
+// Send OTP Email
 export async function sendOTPEmail(email, otp) {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `"Good2Go" <${process.env.BREVO_EMAIL}>`,
     to: email,
-    subject: "Good2Go - Email Verification OTP",
+    subject: "Your Good2Go Verification Code",
     html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-          }
-          .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: #ffffff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-          }
-          .header {
-            background: linear-gradient(135deg, #D00000, #3F88C5);
-            padding: 30px;
-            text-align: center;
-            color: white;
-          }
-          .content {
-            padding: 40px 30px;
-          }
-          .otp-box {
-            background-color: #F3F7F0;
-            border: 2px dashed #3F88C5;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            margin: 30px 0;
-          }
-          .otp-code {
-            font-size: 36px;
-            font-weight: bold;
-            color: #D00000;
-            letter-spacing: 8px;
-            margin: 20px 0;
-          }
-          .footer {
-            background-color: #1C3144;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-          }
-          .logo {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-          }
-          .warning {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
-            font-size: 14px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <div class="logo">🌍 Good2Go</div>
-            <p style="margin: 0; font-size: 16px;">Discover Hidden Places</p>
-          </div>
-          
-          <div class="content">
-            <h2 style="color: #1C3144; margin-top: 0;">Verify Your Email Address</h2>
-            <p style="color: #666; font-size: 16px;">
-              Thank you for registering with Good2Go! To complete your registration, 
-              please use the following One-Time Password (OTP):
-            </p>
-            
-            <div class="otp-box">
-              <p style="margin: 0; color: #666; font-size: 14px;">Your OTP Code</p>
-              <div class="otp-code">${otp}</div>
-              <p style="margin: 0; color: #666; font-size: 14px;">
-                This code will expire in <strong>10 minutes</strong>
-              </p>
-            </div>
-            
-            <div class="warning">
-              <strong>⚠️ Security Notice:</strong><br>
-              Never share this OTP with anyone. Good2Go will never ask for your OTP via phone or email.
-            </div>
-            
-            <p style="color: #666; font-size: 14px;">
-              If you didn't request this code, please ignore this email or contact our support team.
-            </p>
-          </div>
-          
-          <div class="footer">
-            <p style="margin: 5px 0;">Good2Go - Find Hidden Gems</p>
-            <p style="margin: 5px 0;">© ${new Date().getFullYear()} Good2Go. All rights reserved.</p>
-          </div>
+      <div style="font-family: 'Poppins', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #D00000; margin: 0;">Good2Go</h1>
+          <p style="color: #546677;">Discover Hidden Places</p>
         </div>
-      </body>
-      </html>
+        
+        <div style="background: #F3F7F0; border-radius: 12px; padding: 30px; text-align: center;">
+          <h2 style="color: #1C3144; margin-bottom: 10px;">Verify Your Email</h2>
+          <p style="color: #546677; margin-bottom: 20px;">
+            Enter this code to complete your registration:
+          </p>
+          
+          <div style="background: white; border-radius: 8px; padding: 20px; display: inline-block;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1C3144;">
+              ${otp}
+            </span>
+          </div>
+          
+          <p style="color: #999; font-size: 14px; margin-top: 20px;">
+            This code expires in 10 minutes.
+          </p>
+        </div>
+        
+        <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
+          If you didn't request this code, you can safely ignore this email.
+        </p>
+      </div>
     `,
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    return { success: true };
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent:", info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error("Email send error:", error);
     return { success: false, error: error.message };
   }
 }
+
+// ============================================
+// Setup Instructions for Brevo:
+// ============================================
+// 1. Go to https://www.brevo.com/ and create free account
+// 2. Go to Settings → SMTP & API → SMTP
+// 3. Click "Generate a new SMTP key"
+// 4. Add to Render environment variables:
+//    - BREVO_EMAIL = your-login-email@example.com
+//    - BREVO_SMTP_KEY = xsmtpsib-xxxxx-xxxxx
+// ============================================

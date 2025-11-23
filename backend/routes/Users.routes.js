@@ -1,4 +1,3 @@
-// backend/routes/Users.routes.js (Enhanced with Google OAuth)
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -14,15 +13,8 @@ dotenv.config();
 
 const router = express.Router();
 const key = process.env.JWT_SECRET;
-
-// Initialize Google OAuth client
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// ==========================================
-// GOOGLE OAUTH ROUTES
-// ==========================================
-
-// Google Sign In/Sign Up
 router.post("/google-auth", async (req, res) => {
   const { credential } = req.body;
 
@@ -34,7 +26,6 @@ router.post("/google-auth", async (req, res) => {
   }
 
   try {
-    // Verify Google token
     const ticket = await googleClient.verifyIdToken({
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -42,22 +33,15 @@ router.post("/google-auth", async (req, res) => {
 
     const payload = ticket.getPayload();
     const { email, name, sub: googleId, picture } = payload;
-
-    // Check if user exists
     let user = await User.findOne({ email });
 
     if (user) {
-      // User exists - sign in
-      // Update Google ID if not set
       if (!user.googleId) {
         user.googleId = googleId;
         user.profilePicture = picture;
         await user.save();
       }
     } else {
-      // New user - sign up
-      // For Google auth, we don't need password
-      // Generate a random password hash (user won't use it)
       const randomPassword = Math.random().toString(36).slice(-8);
       const salt = await bcrypt.genSalt(5);
       const passwordHash = await bcrypt.hash(randomPassword, salt);
@@ -68,13 +52,12 @@ router.post("/google-auth", async (req, res) => {
         passwordHash,
         googleId,
         profilePicture: picture,
-        isEmailVerified: true, // Google already verified email
+        isEmailVerified: true,
       });
 
       await user.save();
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       {
         id: user._id,
@@ -107,11 +90,6 @@ router.post("/google-auth", async (req, res) => {
   }
 });
 
-// ==========================================
-// EMAIL OTP ROUTES
-// ==========================================
-
-// Request OTP for signup
 router.post("/request-otp", async (req, res) => {
   const { email } = req.body;
 
@@ -123,7 +101,6 @@ router.post("/request-otp", async (req, res) => {
   }
 
   try {
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -132,16 +109,10 @@ router.post("/request-otp", async (req, res) => {
       });
     }
 
-    // Generate OTP
     const otp = generateOTP();
-
-    // Delete any existing OTP for this email
     await OTP.deleteMany({ email });
-
-    // Save new OTP
     await OTP.create({ email, otp });
 
-    // Send OTP email
     const emailResult = await sendOTPEmail(email, otp);
 
     if (!emailResult.success) {
@@ -161,7 +132,6 @@ router.post("/request-otp", async (req, res) => {
   }
 });
 
-// Verify OTP and complete signup
 router.post("/signup", async (req, res) => {
   const { username, email, password, otp } = req.body;
 
@@ -230,10 +200,6 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// ==========================================
-// REGULAR LOGIN
-// ==========================================
-
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -291,10 +257,6 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
-
-// ==========================================
-// OTHER ROUTES (unchanged)
-// ==========================================
 
 router.get("/me", auth, async (req, res) => {
   try {

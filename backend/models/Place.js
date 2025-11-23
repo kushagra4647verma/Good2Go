@@ -11,7 +11,6 @@ const placeSchema = new mongoose.Schema(
     location: { type: String, required: true },
     image: { type: String },
 
-    // New fields for tags and coordinates
     tags: [
       {
         type: String,
@@ -37,7 +36,6 @@ const placeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for search functionality
 placeSchema.index({
   name: "text",
   location: "text",
