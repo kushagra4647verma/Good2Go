@@ -1,27 +1,20 @@
-// backend/utils/emailService.js
-// Using Brevo (formerly Sendinblue) - Works on Render!
-// Free: 300 emails/day
-
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-// Brevo SMTP configuration
 const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
   port: 587,
   secure: false,
   auth: {
-    user: process.env.BREVO_EMAIL, // Your Brevo login email
-    pass: process.env.BREVO_SMTP_KEY, // Your Brevo SMTP key (NOT API key)
+    user: process.env.BREVO_EMAIL,
+    pass: process.env.BREVO_SMTP_KEY,
   },
-  // Important: Increase timeout for cloud deployments
   connectionTimeout: 10000,
   greetingTimeout: 10000,
   socketTimeout: 15000,
 });
 
-// Verify connection on startup
 transporter.verify((error, success) => {
   if (error) {
     console.error("SMTP connection error:", error);
@@ -30,12 +23,10 @@ transporter.verify((error, success) => {
   }
 });
 
-// Generate 6-digit OTP
 export function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Send OTP Email
 export async function sendOTPEmail(email, otp) {
   const mailOptions = {
     from: `"Good2Go" <${process.env.BREVO_EMAIL}>`,
